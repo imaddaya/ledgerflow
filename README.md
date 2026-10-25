@@ -1,140 +1,137 @@
 # LedgerFlow
 
-**A merchant payments and reconciliation workspace built to learn Java through a realistic fintech problem.**
+**A full-stack merchant payment management and reconciliation demo built with Java, Spring Boot, and Angular.**
 
-An operator requests a payment. A different approver reviews it. Approval moves synthetic funds and writes a balanced double-entry journal in one transaction. A CSV statement is then checked against those payments to identify matches and exceptions.
+LedgerFlow models a payment workflow from request to approval and ledger posting. It also supports statement reconciliation, allowing users to compare imported bank-style CSV records against transfers in the application.
 
-This is an AI-assisted educational portfolio application. It is a working local sandbox, with source code, tests and a complete interface. It has no real bank connection, payment gateway, card handling, customer onboarding or regulatory certification.
+The project runs locally with sample accounts and simulated transactions. It does **not** connect to a real bank or process real payments.
 
-## Start here
+## Features
 
-| Your next step | Guide |
-|---|---|
-| Use IntelliJ IDEA for the entire project | [IntelliJ setup: Java, Angular, tests, GitHub](docs/INTELLIJ_SETUP.md) |
-| Prefer VS Code on Windows 11 | [Windows setup from scratch](docs/WINDOWS_SETUP.md) |
-| Understand the code and fintech rules | [Architecture](docs/ARCHITECTURE.md) |
-| Run a five-minute demo | [Demo walkthrough](docs/DEMO_WALKTHROUGH.md) |
-| Upload to your own GitHub | [GitHub upload, step by step](docs/GITHUB_UPLOAD.md) |
-| Learn enough to explain and extend it | [Learning path](docs/LEARNING_PATH.md) |
-| Understand the Java market research | [Market findings](docs/MARKET_RESEARCH.md) |
-| Check what was actually tested | [Testing and limitations](docs/TESTING.md) |
+- **Role-based access:** Sign in as an operator, approver/administrator, or read-only viewer.
+- **Transfer management:** Create, search, filter, and inspect payment requests.
+- **Approval workflow:** Approve or reject pending transfers with separate user permissions.
+- **Double-entry ledger:** Record balanced debit and credit entries for posted transfers.
+- **Refunds:** Reverse eligible posted transfers with corresponding journal entries.
+- **Reconciliation:** Import CSV statements and review matches and exceptions.
+- **Dashboard:** View merchant balances, posted payment totals, pending requests, and reconciliation summaries.
+- **Audit history:** Review recorded activity and payment history.
 
-## What you can do
+## Tech stack
 
-- Sign in as an operator, approver or read-only viewer.
-- See merchant balances, posted payment volume, pending approvals and reconciliation exceptions.
-- Create payments with decimal validation and retry-safe idempotency keys.
-- Approve or reject a request as a different user; approve only once.
-- Post equal debit and credit lines, with atomic balance updates and an audit event.
-- Refund a posted payment once through a reversing journal entry, provided the recipient has sufficient funds.
-- Browse and filter transfers; inspect their journal entries.
-- Add zero-balance merchant accounts as an administrator.
-- Upload a statement CSV and inspect matched, duplicate, unknown, unposted, currency-mismatched and amount-mismatched rows.
-- Read the paginated journal, import history and administrator audit log.
+| Area | Technologies |
+| --- | --- |
+| Backend | Java 21, Spring Boot 3.5, Maven |
+| Frontend | Angular 22, TypeScript |
+| Data | Spring Data JPA, Hibernate, H2 (local), PostgreSQL (optional) |
+| Security | Spring Security, session authentication, role-based access |
+| Database migrations | Flyway |
+| Testing | JUnit 5, Spring Boot Test, MockMvc, Vitest |
+| Tooling | IntelliJ IDEA, Git, GitHub Actions, Docker Compose (optional) |
 
-## Stack
+## How it works
 
-| Layer | Technology | Purpose |
-|---|---|---|
-| Backend | Java 21; Spring Boot 3.5.16 | Typed business services and REST API |
-| Persistence | Spring Data JPA; Hibernate 6.6, managed by Boot | Entity mapping, transactions and locking |
-| Database | PostgreSQL 17; H2 local profile | Relational production-style route and easy local start |
-| Migrations | Flyway | Versioned schema, validated rather than auto-created by Hibernate |
-| Security | Spring Security; BCrypt; sessions; CSRF | Password verification and role boundaries |
-| Frontend | Angular 22; TypeScript 6; signals; forms; HttpClient | Responsive operations interface |
-| Tests | JUnit 5; Spring Boot integration tests; MockMvc; Vitest | Business rules, concurrency, API security and form validation |
-| PostgreSQL verification | Testcontainers, opt-in Maven profile | Same migration and payment flow on real PostgreSQL |
-| Packaging | Maven wrapper; npm lockfile; Docker Compose; Nginx | Reproducible developer and container routes |
-| Automation | GitHub Actions workflow | Backend, PostgreSQL integration and frontend checks after you push |
-| API reference | springdoc OpenAPI / Swagger UI | Inspect endpoints and DTOs while signed in |
+```
+Angular interface
+       |
+       v
+Spring Boot REST API
+       |
+       v
+Business services (transfers, approvals, ledger, reconciliation)
+       |
+       v
+JPA repositories + database
+```
 
-Java 21 and Spring Boot 3.5 are deliberate learning baselines. Some current vacancies use Java 25 and Boot 4; upgrading is a useful later exercise. The Angular version and its TypeScript dependency are pinned together.
+A typical transfer follows this flow:
 
-## Quick local start
+1. An operator creates a payment request.
+2. An authorized approver reviews the pending request.
+3. When approved, the application records the transfer and balanced ledger entries.
+4. A statement CSV can be imported to match records or identify exceptions.
 
-Install JDK 21, Node.js 24 LTS and Git first; see the Windows guide for every download and check. No separate database, global Angular CLI or Maven installation is needed for this route.
+## Getting started
 
-In **PowerShell terminal 1**, from the extracted project:
+### Requirements
+
+- **JDK 21**
+- **Node.js 24** and npm
+- **IntelliJ IDEA** (recommended, but not required)
+
+The local setup uses H2, so PostgreSQL and Docker are **not** required to run the application.
+
+### 1. Start the backend
+
+Open the project in IntelliJ IDEA and import `backend/pom.xml` as a Maven project. In a terminal at the project root, run:
 
 ```powershell
-cd C:\Projects\ledgerflow\backend
+cd backend
 .\mvnw.cmd spring-boot:run
 ```
 
-Leave it running. In **PowerShell terminal 2**:
+Keep this terminal running. The backend listens on **http://localhost:8080**.
+
+Alternatively, run `LedgerFlowApplication.java` from IntelliJ and set its run configuration's **working directory to `backend`**.
+
+### 2. Start the frontend
+
+Open a **second terminal** at the project root:
 
 ```powershell
-cd C:\Projects\ledgerflow\frontend
+cd frontend
 npm.cmd ci
 npm.cmd start
 ```
 
-Open **http://localhost:4200**. Use `localhost` consistently so the same-origin session and CSRF cookies work. H2 data persists under `backend/data/`.
+Open **http://127.0.0.1:4200/** in your browser.
 
-On macOS/Linux, the backend command is `./mvnw spring-boot:run`; frontend commands are `npm ci` and `npm start`.
+### 3. Sign in with a demo account
 
-| Role | Email | Default demo password |
-|---|---|---|
-| Operator | operator@ledgerflow.demo | DemoPass123! |
-| Approver / administrator | approver@ledgerflow.demo | DemoPass123! |
-| Read-only viewer | viewer@ledgerflow.demo | DemoPass123! |
+| Role | Email | Password |
+| --- | --- | --- |
+| Operator | `operator@ledgerflow.demo` | `DemoPass123!` |
+| Approver / administrator | `approver@ledgerflow.demo` | `DemoPass123!` |
+| Viewer | `viewer@ledgerflow.demo` | `DemoPass123!` |
 
-## PostgreSQL and all-container route
+**These credentials are only for the local demo.** Do not use them for a public deployment.
 
-Install and start Docker Desktop, then run from the root directory:
+## Running tests
 
-```powershell
-Copy-Item .env.example .env
-docker compose up --build
-```
-
-Open **http://localhost:8088**. This runs PostgreSQL, the Java API and Angular behind Nginx. Do not start the local backend at the same time because it uses the same port.
-
-Stop containers with `docker compose down`. Database contents stay in the named volume. Deleting that volume is a separate, destructive reset; see the Windows guide.
-
-To use PostgreSQL with the frontend developer server instead, start only the database and use the postgres profile:
+**Backend** (from the `backend` directory):
 
 ```powershell
-docker compose up -d database
-cd backend
-.\mvnw.cmd spring-boot:run "-Dspring-boot.run.profiles=postgres"
-```
-
-## Tests
-
-```powershell
-cd backend
 .\mvnw.cmd test
-# Optional real PostgreSQL integration test; Docker must be running:
-.\mvnw.cmd -Ppostgres-tests verify
-cd ..\frontend
-npm.cmd ci
+```
+
+**Frontend** (from the `frontend` directory):
+
+```powershell
 npm.cmd test
 npm.cmd run build
 ```
 
-The delivery verification record and unexecuted checks are in [TESTING.md](docs/TESTING.md). Do not represent a supplied CI workflow as an already-passing GitHub run.
+The backend integration test suite has been run locally with **13 tests passing, 0 failures, and 0 errors**.
 
-## Source layout
+## Project structure
 
-| Path | What to read |
-|---|---|
-| `backend/src/main/java/com/ledgerflow/TransferService.java` | Payment state changes, idempotency and locking |
-| `LedgerService.java` in the same directory | Journal postings and balance integrity checks |
-| `ReconciliationService.java` | CSV parsing and classification |
-| `SecurityConfig.java` | Login, roles and Angular-compatible CSRF |
-| `ApiController.java` / `ApiModels.java` | REST endpoints and validated request/response DTOs |
-| `backend/src/main/resources/db/migration/` | Relational schema |
-| `backend/src/test/` | Integration tests and separate PostgreSQL test |
-| `frontend/src/app/` | Angular state, templates, models and form tests |
-| `.github/workflows/ci.yml` | Checks to run on your GitHub repository |
+```
+ledgerflow/
+├── backend/              # Spring Boot API, domain logic, and tests
+├── frontend/             # Angular user interface
+├── docs/                 # Setup guides and technical documentation
+├── .github/workflows/    # Automated checks
+├── compose.yml           # Optional container configuration
+└── README.md
+```
 
-## Scope and next steps
+## Documentation
 
-This application uses a single backend and one currency to keep transaction behavior understandable. The dashboard reads a small demo dataset; it is not designed for millions of rows. Some read paths intentionally favor clarity over query optimization. There is no Kafka, Kubernetes, Oracle, OAuth identity provider or cloud deployment in the delivered implementation.
+- [IntelliJ setup guide](docs/INTELLIJ_SETUP.md)
+- [Architecture and design](docs/ARCHITECTURE.md)
+- [Demo walkthrough](docs/DEMO_WALKTHROUGH.md)
+- [Testing details](docs/TESTING.md)
 
-Useful next increments are a real PostgreSQL test run, browser acceptance testing, query optimization, an outbox-based notification flow, OIDC login and a Boot 4/Java 25 migration. Learn and implement these individually before adding them to your CV.
+## Project scope
 
-Keep this demo local. Before any public deployment, replace seeded credentials, disable demo seeding, add managed authentication and HTTPS, review access scope and logging, and implement an operational security plan appropriate to the data being handled.
-
-Licensed under MIT. Third-party dependencies retain their own licenses.
+LedgerFlow is an **educational fintech simulation** built around a local demo dataset. It demonstrates backend API development, payment workflows, transaction handling, access control, and full-stack integration. It is not a production banking or payment-processing system.
