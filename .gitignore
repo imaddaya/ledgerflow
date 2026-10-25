@@ -1,0 +1,17 @@
+# Dependencies and generated output
+**/node_modules/
+**/target/
+**/dist/
+**/.angular/
+**/coverage/
+**/data/
+*.log
+*.mv.db
+*.trace.db
+.env
+.env.*
+!.env.example
+.idea/
+.vscode/
+.DS_Store
+Thumbs.db

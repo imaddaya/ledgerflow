@@ -1,0 +1,47 @@
+name: ledgerflow
+services:
+  database:
+    image: postgres:17-alpine
+    environment:
+      POSTGRES_DB: ledgerflow
+      POSTGRES_USER: ledgerflow
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-ledgerflow_local_only}
+    ports:
+      - "127.0.0.1:5432:5432"
+    volumes:
+      - ledgerflow-db:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ledgerflow -d ledgerflow"]
+      interval: 5s
+      timeout: 5s
+      retries: 15
+  backend:
+    build: ./backend
+    environment:
+      SPRING_PROFILES_ACTIVE: postgres
+      DB_URL: jdbc:postgresql://database:5432/ledgerflow
+      DB_USER: ledgerflow
+      DB_PASSWORD: ${POSTGRES_PASSWORD:-ledgerflow_local_only}
+      DEMO_PASSWORD: ${DEMO_PASSWORD:-DemoPass123!}
+      DEMO_SEED: "true"
+      SERVER_ADDRESS: 0.0.0.0
+    depends_on:
+      database:
+        condition: service_healthy
+    ports:
+      - "127.0.0.1:8080:8080"
+    healthcheck:
+      test: ["CMD", "wget", "--spider", "-q", "http://127.0.0.1:8080/actuator/health"]
+      interval: 10s
+      timeout: 5s
+      start_period: 60s
+      retries: 12
+  frontend:
+    build: ./frontend
+    ports:
+      - "127.0.0.1:8088:80"
+    depends_on:
+      backend:
+        condition: service_healthy
+volumes:
+  ledgerflow-db:
