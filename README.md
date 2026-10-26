@@ -1,10 +1,14 @@
 # LedgerFlow
 
+[![Verify LedgerFlow](https://github.com/imaddaya/ledgerflow/actions/workflows/ci.yml/badge.svg)](https://github.com/imaddaya/ledgerflow/actions/workflows/ci.yml)
+
 **A full-stack merchant payment management and reconciliation demo built with Java, Spring Boot, and Angular.**
 
 LedgerFlow models a payment workflow from request to approval and ledger posting. It also supports statement reconciliation, allowing users to compare imported bank-style CSV records against transfers in the application.
 
 The project runs locally with sample accounts and simulated transactions. It does **not** connect to a real bank or process real payments.
+
+Start with the [five-minute demo walkthrough](docs/DEMO_WALKTHROUGH.md) and [verification record](docs/TESTING.md).
 
 ## Features
 
@@ -70,6 +74,8 @@ cd backend
 .\mvnw.cmd spring-boot:run
 ```
 
+On Linux/macOS, use `./mvnw spring-boot:run` from `backend/` instead. The Unix wrapper is executable in Git.
+
 Keep this terminal running. The backend listens on **http://localhost:8080**.
 
 Alternatively, run `LedgerFlowApplication.java` from IntelliJ and set its run configuration's **working directory to `backend`**.
@@ -84,7 +90,7 @@ npm.cmd ci
 npm.cmd start
 ```
 
-Open **http://127.0.0.1:4200/** in your browser.
+On Linux/macOS, use `npm ci` and `npm start`. Open **http://127.0.0.1:4200/** in your browser.
 
 ### 3. Sign in with a demo account
 
@@ -111,7 +117,7 @@ npm.cmd test
 npm.cmd run build
 ```
 
-The backend integration test suite has been run locally with **13 tests passing, 0 failures, and 0 errors**.
+The backend integration suite has **13 passing tests**. GitHub Actions also runs the PostgreSQL Testcontainers profile. With Docker running, use `./mvnw -Ppostgres-tests verify` from `backend/` (`.\mvnw.cmd` on Windows). See [TESTING.md](docs/TESTING.md) for the verified run and check limits.
 
 ## Project structure
 
